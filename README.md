@@ -1,6 +1,8 @@
 # xTeX - eXtended TeX
 A tool that goes from one line requirement (english) to 95% perfect python code  (source code)
 
+# Status
+The proof of concept is in development.
 
 # Documentation
 - Notes for development: https://docs.google.com/document/d/1i2vKFaCgcxZfbDUMXeWMTek8BmKnHJlaSpkPfMvihV8/edit?usp=sharing
