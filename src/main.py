@@ -1,6 +1,7 @@
 import sys
 import json
 import requests
+import scoring
 
 DEBUG=False
 
@@ -56,6 +57,18 @@ def query_llm_generate_python(user_prompt, seed=123):
     parsed = json.loads(res.json()["response"])
     return parsed["pythonSource"]
 
+def evolver(req):
+    survivors = []
+
+    for i in range(10):
+        prog_candidate = query_llm_generate_python("write me a python program that meets the requirements below \ngive me source code as a response\n" + req, seed=i)
+        score = scoring.score(prog_candidate)
+
+        if score > 0:
+            survivors.append(prog_candidate)
+
+    print("Survivors: " + str(len(survivors)))
+
 def main():
    req_file = sys.argv[1]
 
@@ -64,8 +77,6 @@ def main():
 
    req = read_markdown(req_file)
 
-   for i in range(100):
-       prog_candidate = query_llm_generate_python("write me a python program that meets the requirements below \ngive me source code as a response\n" + req, seed=i)
-       print(prog_candidate)
+   evolver(req)
 
 main()
