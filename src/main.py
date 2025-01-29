@@ -59,15 +59,25 @@ def query_llm_generate_python(user_prompt, seed=123):
 
 def evolver(req):
     survivors = []
+    feedback = []
 
     for i in range(10):
         prog_candidate = query_llm_generate_python("write me a python program that meets the requirements below \ngive me source code as a response\n" + req, seed=i)
         score = scoring.score(prog_candidate)
 
-        if score > 0:
+        pylint_score = score["pylint"]["score"]
+
+        if pylint_score < 0.01:
+            feedback.append({"py_source": prog_candidate, "pylint": score["pylint"] })
+
+        if pylint_score > 0:
             survivors.append(prog_candidate)
 
-    print("Survivors: " + str(len(survivors)))
+
+    if len(survivors) == 0:
+        print("no survivors left. should go back a generation or incorporate feedback")
+    elif len(survivors) > 5:
+        print("has survivors. progress to the next generation")
 
 def main():
    req_file = sys.argv[1]

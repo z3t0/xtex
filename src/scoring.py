@@ -12,7 +12,11 @@ def pylint(py_source):
             match = re.search(r'Your code has been rated at (\d+\.\d+)/\d+', stdout)
 
             score = float(match.group(1))
-            return score
+            ret = {"feedback": stdout,
+                   "score": score
+                   }
+            return ret
+        
         if stderr:
             raise("Pylint error")
     except Exception as e:
@@ -23,7 +27,7 @@ def score(py_source):
 
     # characteristics:
     # linter: pylint, pick one for now
-    return pylint(py_source)
+    return {"pylint": pylint(py_source)}
 
     # return weighted score out of 100.
     
