@@ -1,9 +1,60 @@
 import sys
+import json
+import requests
+
+DEBUG=False
 
 def read_markdown(req_name):
-    with open(req_name, 'r') as f:
-        return f.readlines()
+    acc = ""
 
+    lines = None
+    
+    with open(req_name, 'r') as f:
+        lines = f.readlines()
+
+    for line in lines:
+        acc += line
+
+    return acc
+
+def query_llm_generate_python(user_prompt, seed=123):
+
+    def model():
+        return "hf.co/beowolx/CodeNinja-1.0-OpenChat-7B-GGUF"
+
+    def prompt():
+        return "" + user_prompt + """\nThe JSON should be structured like this:
+    {
+        "pythonSource": "the generated Python code as a string"
+    }
+    """
+
+    def options():
+        # set seed for deterministic testing.
+        return {"seed": seed}
+
+    def headers():
+        return {"content-type": "application/json"}
+
+    if DEBUG:
+        print("**PROMPT")
+        print(prompt())
+
+    body = {
+        "model": model(),
+        "format": "json",
+        "stream": False,
+        "prompt": prompt(),
+        "options": options()
+    }
+
+    def host():
+        return "rk-mbp-g3h"
+    url = "http://" + host() + ":11434/api/generate"
+    res = requests.post(url, headers=headers(), data = json.dumps(body))
+
+    parsed = json.loads(res.json()["response"])
+    return parsed["pythonSource"]
 
 def main():
    req_file = sys.argv[1]
@@ -13,6 +64,8 @@ def main():
 
    req = read_markdown(req_file)
 
-   print(req)
-    
+   for i in range(100):
+       prog_candidate = query_llm_generate_python("write me a python program that meets the requirements below \ngive me source code as a response\n" + req, seed=i)
+       print(prog_candidate)
+
 main()
